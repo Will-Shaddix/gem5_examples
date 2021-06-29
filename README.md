@@ -31,4 +31,4 @@ This file has a replaces the cpu with a linear traffic generator.
 
 
 
-\ * \ - (For simplicity this code is largely taken from gem5/configs/learning_gem5/part2/simple_memobj.py)
+\* - (For simplicity this code is largely taken from gem5/configs/learning_gem5/part2/simple_memobj.py)
