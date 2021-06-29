@@ -41,11 +41,33 @@ from m5.util.convert import *
 import argparse
 import math
 
+
+
+
+# Helper Functions
+#
+
+def createLinearTraffic(tgen, tgen_options):
+    yield tgen.createLinear(tgen_options.duration,
+                            tgen_options.min_addr,
+                            tgen_options.max_addr,
+                            tgen_options.block_size,
+                            tgen_options.min_period,
+                            tgen_options.max_period,
+                            tgen_options.rd_perc, 0)
+    yield tgen.createExit(0)
+
+#
+#
+
 # Command line arguments
 #
 #   needed for linear traffic gen: duration, min_addr, max_addr, 
 #   block_size, min_period, max_period, rd_perc
 #
+
+
+
 
 parser = argparse.ArgumentParser()
 
@@ -101,8 +123,10 @@ injection_period = int((1e12 * options.block_size) /
                     (options.injection_rate * 1073741824))
 options.min_period = injection_period
 options.max_period = injection_period
-print("duration: ", options.duration, "  max_addr: ", options.max_addr)
+# print("duration: ", options.duration, "  max_addr: ", options.max_addr)
 
+
+print("all options: ", options, "\n")
 #
 #
 #
@@ -124,7 +148,7 @@ system.mem_mode = 'timing'               # Use timing accesses
 system.mem_ranges = [AddrRange('512MB')] # Create an address range
 
 # Create a simple CPU
-system.cpu = TimingSimpleCPU()
+# system.cpu = TimingSimpleCPU()
 
 system.tgens = [PyTrafficGen() for i in range(1)]
 
@@ -146,11 +170,11 @@ print("tgens = ", system.tgens)
 #tgen.port = system.membuses[i].cpu_side_ports
 
 # Create the simple memory object
-system.memobj = SimpleMemobj()
+# system.memobj = SimpleMemobj()
 
 # Hook the CPU ports up to the cache
-system.cpu.icache_port = system.memobj.inst_port
-system.cpu.dcache_port = system.memobj.data_port
+# system.cpu.icache_port = system.memobj.inst_port
+# system.cpu.dcache_port = system.memobj.data_port
 
 # Create a memory bus, a coherent crossbar, in this case
 system.membus = SystemXBar(width = 64, max_routing_table_size = 16777216)
@@ -164,13 +188,13 @@ for i, tgen in enumerate(system.tgens):
 
 
 # Connect the memobj
-system.memobj.mem_side = system.membus.cpu_side_ports
+# system.memobj.mem_side = system.membus.cpu_side_ports
 
 # create the interrupt controller for the CPU and connect to the membus
-system.cpu.createInterruptController()
-system.cpu.interrupts[0].pio = system.membus.mem_side_ports
-system.cpu.interrupts[0].int_requestor = system.membus.cpu_side_ports
-system.cpu.interrupts[0].int_responder = system.membus.mem_side_ports
+# system.cpu.createInterruptController()
+# system.cpu.interrupts[0].pio = system.membus.mem_side_ports
+# system.cpu.interrupts[0].int_requestor = system.membus.cpu_side_ports
+# system.cpu.interrupts[0].int_responder = system.membus.mem_side_ports
 
 # Create a DDR3 memory controller and connect it to the membus
 system.mem_ctrl = MemCtrl()
@@ -182,19 +206,19 @@ system.mem_ctrl.port = system.membus.mem_side_ports
 system.system_port = system.membus.cpu_side_ports
 
 # Create a process for a simple "Hello World" application
-process = Process()
-# Set the command
-# grab the specific path to the binary
-thispath = os.path.dirname(os.path.realpath(__file__))
-binpath = os.path.join(thispath, '../../../',
-                       'tests/test-progs/hello/bin/x86/linux/hello')
-# cmd is a list which begins with the executable (like argv)
-process.cmd = [binpath]
-# Set the cpu to use the process as its workload and create thread contexts
-system.cpu.workload = process
-system.cpu.createThreads()
+# process = Process()
+# # Set the command
+# # grab the specific path to the binary
+# thispath = os.path.dirname(os.path.realpath(__file__))
+# binpath = os.path.join(thispath, '../../../',
+#                        'tests/test-progs/hello/bin/x86/linux/hello')
+# # cmd is a list which begins with the executable (like argv)
+# process.cmd = [binpath]
+# # Set the cpu to use the process as its workload and create thread contexts
+# system.cpu.workload = process
+# system.cpu.createThreads()
 
-system.workload = SEWorkload.init_compatible(binpath)
+# system.workload = SEWorkload.init_compatible(binpath)
 
 # set up the root SimObject and start the simulation
 root = Root(full_system = False, system = system)
@@ -204,15 +228,15 @@ m5.instantiate()
 if options.mode == 'linear':
     print("in linear")
     for i, tgen in enumerate(system.tgens):
+        print("tgen type = ", type(tgen))
         options.min_addr = i * 64
-        tgen.start(tgen.createLinear(options.duration,
-                            options.min_addr,
-                            options.max_addr,
-                            options.block_size,
-                            options.min_period,
-                            options.max_period,
-                            options.rd_perc,
-                            0))
+
+        # print("tgen type = ", type(tgen))
+       
+        # print("before tgen start")
+        tgen.start(createLinearTraffic(tgen, options))
+        # print("after tgen start")
+
 
 print("Beginning simulation!")
 exit_event = m5.simulate()
