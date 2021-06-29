@@ -8,4 +8,5 @@ mult_drams.py
 
 ## Not Functioning
 simple_tgen.py
+TestBenchSystem.py
 
