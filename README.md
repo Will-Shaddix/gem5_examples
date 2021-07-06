@@ -11,7 +11,8 @@ tgen_HBM.py(must be run with appropriate parameters)
 
 
 ## Not Functioning   
-TestBenchSystem.py
+TestBenchSystem.py    
+FGDRAM.py(just a class)    
 
 
 
