@@ -12,7 +12,7 @@ tgen_HBM.py(must be run with appropriate parameters)
 
 ## Not Functioning   
 TestBenchSystem.py    
-FGDRAM.py(just a class)    
+FGDRAM_interface.py(just a class)    
 
 
 
